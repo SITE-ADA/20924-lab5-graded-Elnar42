@@ -149,16 +149,21 @@ public class EventController {
             @PathVariable UUID id,
             @RequestParam BigDecimal price) {
 
+        // 1. Controller-level validation
         if (price == null || price.compareTo(BigDecimal.ZERO) < 0) {
             return ResponseEntity.badRequest().build();
         }
+
         try {
             Event updatedEvent = eventService.updateEventPrice(id, price);
             return ResponseEntity.ok(updatedEvent);
-        } catch (HttpClientErrorException.NotFound e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (IllegalArgumentException e) {
+            // This ensures the 400 is returned if the service throws it
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            // If the service throws a 'Not Found' related exception,
+            // make sure you catch it and return 404 here
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
