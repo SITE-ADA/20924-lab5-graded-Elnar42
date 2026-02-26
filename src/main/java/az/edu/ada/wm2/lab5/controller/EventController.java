@@ -3,12 +3,18 @@ package az.edu.ada.wm2.lab5.controller;
 import az.edu.ada.wm2.lab5.model.Event;
 import az.edu.ada.wm2.lab5.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
 
 @RestController
 @RequestMapping("/api/events")
@@ -82,7 +88,6 @@ public class EventController {
         }
     }
 
-    // 6. PARTIAL UPDATE (PATCH) - PATCH /api/events/{id}
     @PatchMapping("/{id}")
     public ResponseEntity<Event> partialUpdateEvent(@PathVariable UUID id, @RequestBody Event partialEvent) {
         try {
@@ -92,6 +97,73 @@ public class EventController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/filter/date")
+    public ResponseEntity<List<Event>> getEventsByDateRange(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+
+        if (start == null || end == null || start.isAfter(end)) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<Event> events = eventService.getEventsByDateRange(start, end);
+        return ResponseEntity.ok(events);
+    }
+
+    @GetMapping("/filter/price")
+    public ResponseEntity<List<Event>> getEventsByPriceRange(
+            @RequestParam(required = false) BigDecimal min,
+            @RequestParam(required = false) BigDecimal max) {
+
+        if (min == null || max == null ||
+                min.compareTo(BigDecimal.ZERO) < 0 ||
+                max.compareTo(min) < 0) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<Event> events = eventService.getEventsByPriceRange(min, max);
+        return ResponseEntity.ok(events);
+    }
+
+    @GetMapping("/filter/tag")
+    public ResponseEntity<List<Event>> getEventsByTag(@RequestParam(required = false) String tag) {
+        if (tag == null || tag.trim().isEmpty()) {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
+
+        List<Event> events = eventService.getEventsByTag(tag.trim());
+        return ResponseEntity.ok(events);
+    }
+
+    @GetMapping("/upcoming")
+    public ResponseEntity<List<Event>> getUpcomingEvents() {
+        List<Event> events = eventService.getUpcomingEvents();
+        return ResponseEntity.ok(events);
+    }
+
+    @PatchMapping("/{id}/price")
+    public ResponseEntity<Event> updateEventPrice(
+            @PathVariable UUID id,
+            @RequestParam BigDecimal price) {
+
+        // 1. Controller-level validation
+        if (price == null || price.compareTo(BigDecimal.ZERO) < 0) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        try {
+            Event updatedEvent = eventService.updateEventPrice(id, price);
+            return ResponseEntity.ok(updatedEvent);
+        } catch (IllegalArgumentException e) {
+            // This ensures the 400 is returned if the service throws it
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            // If the service throws a 'Not Found' related exception,
+            // make sure you catch it and return 404 here
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 

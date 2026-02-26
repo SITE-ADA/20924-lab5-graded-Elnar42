@@ -2,6 +2,7 @@ package az.edu.ada.wm2.lab5.repository;
 
 import az.edu.ada.wm2.lab5.model.Event;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

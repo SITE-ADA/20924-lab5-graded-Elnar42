@@ -4,7 +4,9 @@ import az.edu.ada.wm2.lab5.model.Event;
 import az.edu.ada.wm2.lab5.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
+import java.util.Collections;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -82,30 +84,71 @@ public class EventServiceImpl implements EventService {
         return eventRepository.save(existingEvent);
     }
 
-    // Custom methods
     @Override
     public List<Event> getEventsByTag(String tag) {
-        return List.of();
+        if (tag == null || tag.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        List<Event> allEvents = eventRepository.findAll();
+
+        return allEvents.stream()
+                .filter(event -> event.getTags() != null &&
+                        event.getTags().contains(tag))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Event> getUpcomingEvents() {
-        return List.of();
+        List<Event> allEvents = eventRepository.findAll();
+
+        return allEvents.stream()
+                .filter(event -> event.getEventDateTime() != null &&
+                        event.getEventDateTime().isAfter(LocalDateTime.now()))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Event> getEventsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
-       return List.of();
+        if (minPrice == null || maxPrice == null || minPrice.compareTo(maxPrice) > 0) {
+            return Collections.emptyList();
+        }
+
+        List<Event> allEvents = eventRepository.findAll();
+
+        return allEvents.stream()
+                .filter(event -> event.getTicketPrice() != null &&
+                        event.getTicketPrice().compareTo(minPrice) >= 0 &&
+                        event.getTicketPrice().compareTo(maxPrice) <= 0)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Event> getEventsByDateRange(LocalDateTime start, LocalDateTime end) {
-        return List.of();
+        if (start == null || end == null || start.isAfter(end)) {
+            return Collections.emptyList();
+        }
+
+        List<Event> allEvents = eventRepository.findAll();
+
+        return allEvents.stream()
+                .filter(event -> event.getEventDateTime() != null &&
+                        !event.getEventDateTime().isBefore(start) &&
+                        !event.getEventDateTime().isAfter(end))
+                .collect(Collectors.toList());
     }
+
 
     @Override
     public Event updateEventPrice(UUID id, BigDecimal newPrice) {
-        return null;
-    }
+        if (newPrice == null || newPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Price cannot be null or negative");
+        }
 
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Event not found with id: " + id));
+
+        event.setTicketPrice(newPrice);
+        return eventRepository.save(event);
+    }
 }

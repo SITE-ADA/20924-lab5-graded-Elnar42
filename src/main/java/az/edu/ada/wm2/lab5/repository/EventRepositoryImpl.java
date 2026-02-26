@@ -2,6 +2,7 @@ package az.edu.ada.wm2.lab5.repository;
 
 import az.edu.ada.wm2.lab5.model.Event;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import org.springframework.stereotype.Repository;
@@ -38,4 +39,6 @@ public class EventRepositoryImpl implements EventRepository {
     public boolean existsById(UUID id) {
         return eventStore.containsKey(id);
     }
+
+
 }
