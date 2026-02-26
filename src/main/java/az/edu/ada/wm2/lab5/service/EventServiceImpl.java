@@ -82,7 +82,6 @@ public class EventServiceImpl implements EventService {
         return eventRepository.save(existingEvent);
     }
 
-    // Custom methods
     @Override
     public List<Event> getEventsByTag(String tag) {
        List<Event> events =  eventRepository.findAll();

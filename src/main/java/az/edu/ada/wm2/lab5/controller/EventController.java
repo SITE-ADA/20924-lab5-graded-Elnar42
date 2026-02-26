@@ -86,7 +86,6 @@ public class EventController {
         }
     }
 
-    // 6. PARTIAL UPDATE (PATCH) - PATCH /api/events/{id}
     @PatchMapping("/{id}")
     public ResponseEntity<Event> partialUpdateEvent(@PathVariable UUID id, @RequestBody Event partialEvent) {
         try {
@@ -111,7 +110,6 @@ public class EventController {
         }
     }
 
-//    // 8. GET /api/events/filter/price
     @GetMapping("/filter/price")
     public ResponseEntity<List<Event>> getEventsByPriceRange(
             @RequestParam BigDecimal min,
@@ -123,8 +121,7 @@ public class EventController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-//
-//    // 9. GET /api/events/filter/tag
+
     @GetMapping("/filter/tag")
     public ResponseEntity<List<Event>> getEventsByTag(@RequestParam String tag) {
         try {
@@ -134,8 +131,8 @@ public class EventController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-//
-//    @GetMapping("/upcoming")
+
+    @GetMapping("/upcoming")
     public ResponseEntity<List<Event>> getUpcomingEvents() {
         try {
             List<Event> events = eventService.getUpcomingEvents();
@@ -144,7 +141,7 @@ public class EventController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-//
+
     @PatchMapping("/{id}/price")
     public ResponseEntity<Event> updateEventPrice(@PathVariable UUID id, @RequestParam BigDecimal price) {
         try {
