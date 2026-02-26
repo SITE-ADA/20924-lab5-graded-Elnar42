@@ -145,15 +145,15 @@ public class EventController {
         }
     }
 //
-//    @PatchMapping("/{id}/price")
-//    public ResponseEntity<Event> updateEventPrice(@PathVariable UUID id, @RequestParam BigDecimal price) {
-//        try {
-//            Event updatedEvent = eventService.updateEventPrice(id, price);
-//            return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
-//        } catch (RuntimeException e) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//        }
-//    }
+    @PatchMapping("/{id}/price")
+    public ResponseEntity<Event> updateEventPrice(@PathVariable UUID id, @RequestParam BigDecimal price) {
+        try {
+            Event updatedEvent = eventService.updateEventPrice(id, price);
+            return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
 }
